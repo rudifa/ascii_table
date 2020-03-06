@@ -1,0 +1,13 @@
+state	s.e	event	action	next state
+.idle  0 cells selected	0.0	hit a free cell	select cell	.booking1
+	0.1	hit a cell in a current user's booking	select cell	.cancelling
+	0.2	hit a cell in other's booking	---	.idle
+	0.3	hourCellsClear	---	.idle
+.booking1 1 cell selected	1.0	hit selected cell	deselect cell	.idle
+	1.1	hit free cell w/o booked cells in between	select cell (as 2nd)	.booking2
+	1.2	hit any other cell	---	.booking1
+	1.4	hourCellsClear		
+.booking2 2 cells selected	2.0	hit one of selected cells	deselect cell	.booking1
+	2.1	hit any other cell, w/o booked cells between it and the 2 selected cells	deselect one of selected cells then select the new cell (as nd)	.booking2
+	2.1	hit any other cell	---	.booking2
+.cancelling  1 cell selected	3.1	hit any cell in the target booking	deselect the selected cell (**)	.idle
