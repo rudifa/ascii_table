@@ -1,7 +1,7 @@
-#!/usr/bin/python
+#!/usr/local/bin/python
 #
 #  ascii_table.py
-#  Converts .tsv and .csv files to ascii table
+#  Converts a .tsv or .csv file to an ascii table
 #
 #  Created by Rudolf Farkas on 28.02.2020
 #  Copyright © 2020 Rudolf Farkas. All rights reserved.
@@ -279,10 +279,10 @@ def run(args):
 # python ascii_table.py tmp/table.tsv
 
 if __name__ == "__main__":
-    parser = ArgumentParser()
-    parser.add_argument("filepath", type=str, default=None)
-    parser.add_argument("-d", default=',')
-    parser.add_argument("-w", default=150, type=int)
+    parser = ArgumentParser(description='Converts a .tsv or .csv file to an ascii table.\nPrints the result to stdout.')
+    parser.add_argument("filepath", type=str, default=None, help='path to a text file containing a tsv or a csv representation of table data.')
+    parser.add_argument("-d", default=',', help='delimiter (determined automatically for .tsv and .csv files)')
+    parser.add_argument("-w", default=150, type=int, help='desired table width (characters)')
     args = parser.parse_args()
 
     # print("args.filepath=", args.filepath)

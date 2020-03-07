@@ -1,4 +1,4 @@
-i#!/usr/bin/python
+#!/usr/local/bin/python
 #
 #  ascii_table_unittest.py
 #  Tests for ascii_table.py
@@ -6,7 +6,8 @@ i#!/usr/bin/python
 #  Created by Rudolf Farkas on 28.02.2020
 #  Copyright © 2020 Rudolf Farkas. All rights reserved.
 #
-mport unittest
+
+import unittest
 from ascii_table import splitme, len_of, max_fieldwidths_from, table_width_for, fit, linebreak_from, fields_from, string_from, limited_lines, table_limited
 from ascii_table import AsciiTable
 
