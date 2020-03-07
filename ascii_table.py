@@ -1,4 +1,11 @@
 #!/usr/bin/python
+#
+#  ascii_table.py
+#  Converts .tsv and .csv files to ascii table
+#
+#  Created by Rudolf Farkas on 28.02.2020
+#  Copyright © 2020 Rudolf Farkas. All rights reserved.
+#
 
 import sys
 import os
