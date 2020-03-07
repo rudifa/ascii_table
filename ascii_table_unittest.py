@@ -10,14 +10,6 @@
 import unittest
 from ascii_table import AsciiTable
 
-class ascii_table_unittest(unittest.TestCase):
-
-    def setUp(self):
-        self.tsv_delim = '\t'
-        self.tsv_3_lines = ["state	s.e	event	action	next state",
-                ".idle  0 cells selected	0.0	hit a free cell	select cell	.booking1",
-                "	0.1	hit a cell in a current user's booking	select cell	.cancelling"]
-
 class AsciiTable_unittest(unittest.TestCase):
 
     def setUp(self):
@@ -25,6 +17,10 @@ class AsciiTable_unittest(unittest.TestCase):
         self.tsv_3_lines = ["state	s.e	event	action	next state",
                 ".idle  0 cells selected	0.0	hit a free cell	select cell	.booking1",
                 "	0.1	hit a cell in a current user's booking	select cell	.cancelling"]
+        self.tsv_3_lines_uneven_len = ["state	s.e	event	action	next state",
+                ".idle  0 cells selected	0.0	hit a free cell	select cell	.booking1	UNKNOWN FLYING OBJECT",
+                "	0.1	hit a cell in a current user's booking	select cell	.cancelling"]
+        self.maxDiff = None # <- enables to display long string differences
 
     def test_splitme(self):
         input = "deselect the selected"
@@ -81,8 +77,8 @@ class AsciiTable_unittest(unittest.TestCase):
     def test_max_fieldwidths_from(self):
         delim = '\t'
         table_width = 80
-        input = self.tsv_3_lines
         self.assertEqual(AsciiTable.max_fieldwidths_from(self.tsv_3_lines, self.tsv_delim), [23, 3, 38, 11, 11])
+        self.assertEqual(AsciiTable.max_fieldwidths_from(self.tsv_3_lines_uneven_len, self.tsv_delim), [23, 3, 38, 11, 11, 21])
 
     def test_table_width_for(self):
         fieldwidths = [23, 3, 38, 11, 11]
@@ -100,14 +96,18 @@ class AsciiTable_unittest(unittest.TestCase):
         self.assertEqual(AsciiTable.fit(max_fieldwidths, table_width), [23, 3, 38, 11, 11])
         table_width = 60
         self.assertEqual(AsciiTable.fit(max_fieldwidths, table_width), [10, 3, 10, 10, 10])
+        max_fieldwidths = [23, 3, 38, 11, 11, 21]
+        self.assertEqual(AsciiTable.fit(max_fieldwidths, table_width), [7, 3, 7, 7, 7, 7])
 
     def test_linebreak_from(self):
         maxwidths = [10, 3, 10, 10, 10]
         self.assertEqual(AsciiTable.linebreak_from(maxwidths), '+------------+-----+------------+------------+------------+')
+        maxwidths = [7, 3, 7, 7, 7, 7]
+        self.assertEqual(AsciiTable.linebreak_from(maxwidths), '+---------+-----+---------+---------+---------+---------+')
 
     def test_string_from(self):
         maxwidths = [10, 3, 10, 10, 10]
-        fields = ['', '0.1', "hit a cell in a current user's booking", 'select cell', '.cancelling']
+        fields = AsciiTable.fields_from(self.tsv_3_lines[2], self.tsv_delim)
         output = AsciiTable.string_from(maxwidths, fields)
         self.assertEqual(output, "|            | 0.1 | hit a cell | select cel | .cancellin |")
 
@@ -125,7 +125,7 @@ class AsciiTable_unittest(unittest.TestCase):
     def test_table_limited(self):
         table_width = 50
         input = ['']
-        self.assertEqual(AsciiTable.table_limited(input, self.tsv_delim, table_width), '+--+\n+--+')
+        self.assertEqual(AsciiTable.table_limited(input, self.tsv_delim, table_width), '+--+')
         table_width = 80
         #self.maxDiff = None #<- uncomment to see long string differences
         expected = """\
@@ -141,6 +141,26 @@ class AsciiTable_unittest(unittest.TestCase):
 +---------------------+-----+---------------------+-------------+-------------+"""
         self.assertEqual(AsciiTable.table_limited(self.tsv_3_lines, self.tsv_delim, table_width), expected)
         #print("\n"+table_limited(input, delim, table_width))
+
+        # verify that uneven number of fields in lines is supported graciosly
+        table_width = 80
+        expected = """\
++--------------+-----+--------------+-------------+-------------+--------------+
+| state        | s.e | event        | action      | next state  |              |
++--------------+-----+--------------+-------------+-------------+--------------+
+| .idle  0     | 0.0 | hit a free   | select cell | .booking1   | UNKNOWN      |
+| cells        |     | cell         |             |             | FLYING       |
+| selected     |     |              |             |             | OBJECT       |
++--------------+-----+--------------+-------------+-------------+--------------+
+|              | 0.1 | hit a cell   | select cell | .cancelling |              |
+|              |     | in a         |             |             |              |
+|              |     | current      |             |             |              |
+|              |     | user's       |             |             |              |
+|              |     | booking      |             |             |              |
++--------------+-----+--------------+-------------+-------------+--------------+"""
+        output = AsciiTable.table_limited(self.tsv_3_lines_uneven_len, self.tsv_delim, table_width)
+        self.assertEqual(output, expected)
+
 
 if __name__ == "__main__":
     unittest.main()

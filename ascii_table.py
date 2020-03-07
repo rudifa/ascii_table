@@ -13,6 +13,14 @@ from itertools import zip_longest
 from argparse import ArgumentParser
 
 class AsciiTable(object):
+
+    def __init__(self, text_lines = [''], delimiter = ','):
+        """Given a list of `text_lines` and a `delimiter` character
+        initialize the instance and prepare for generation of the ascii table representation.
+        """
+        self.text_lines = text_lines
+        self.delimiter = delimiter
+
     @staticmethod
     def len_of(strings):
         """Given a list `strings`, returns the total length of listed strings.
@@ -84,12 +92,15 @@ class AsciiTable(object):
         """Given `fieldwidths` and `linefields`
         compose a string each field is truncated or padded if needed to the corresponding fieldwidth
         then fields are joined by column separators and surrounded by column ends.
+        Moreover, in the case of uneven numbner of fields in lines, pad shorter line fields with '' fields.
         Returns the composed string.
         """
         out = []
         for idx, field in enumerate(linefields):
             fieldwidth = fieldwidths[idx]
             out.append(field[:fieldwidth] + ' ' * (fieldwidth - len(field)))
+        for idx in range(len(linefields), len(fieldwidths)):
+            out.append(' ' * fieldwidths[idx])
         return '| ' + ' | '.join(out) + ' |'
 
     @staticmethod
@@ -127,6 +138,8 @@ class AsciiTable(object):
         textlines = [linebreak]
         for line in lines:
              fields = AsciiTable.fields_from(line, delim)
+             if AsciiTable.len_of(fields) == 0:
+                 continue # skip a blank line
              limited = AsciiTable.limited_lines(new_maxwidths, fields)
              textlines += limited
              textlines.append(linebreak)
@@ -145,7 +158,7 @@ def lines_from(filehandle):
 
 def string_table_limited(filehandle, delim, table_width):
     """Given `filehandle`, `delim` and `table_width` get text lines from the file,
-    compose and return a multiline table string.
+    composes a multiline table string and returns it.
     """
     lines = lines_from(filehandle)
     return AsciiTable.table_limited(lines, delim, table_width)
